@@ -4,6 +4,8 @@ import datetime
 import pytz
 import csv
 import json
+import model
+import utils
 
 # a timestamp I'd like to convert
 my_timestamp = datetime.datetime.now()
@@ -21,56 +23,12 @@ new_timezone_timestamp = old_timezone.localize(my_timestamp).astimezone(new_time
 
 url = "https://bitinfocharts.com/top-100-richest-bitcoin-addresses.html"
 
+
+
 user_agent = 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36'
-header = {
-    'User-Agent': user_agent,
-    'cookie': "lc-acbjp=en; i18n-prefs=USD;"
-}
 
-r = requests.get(url, headers=header)
-html = r.text
-# print(html)
 
-soup = BeautifulSoup(html, 'html5lib')
-tables = soup.find_all('table')
-table = tables[0]
-data = []
-for tr in table.find_all('tr'):
-    td = tr.find_all('td')
-    row = [i.text for i in td]
-    data.append(row)
-print (data)
-# data 2 csv
-# types mean 10^n
-types = [-9999, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
-typeNames = [
-    "(0 - 0.00001)",
-    "[0.00001 - 0.0001)",
-    "[0.0001 - 0.001)",
-    "[0.001 - 0.01)",
-    "[0.01 - 0.1)",
-    "[0.1 - 1)",
-    "[1 - 10)",
-    "[10 - 100)",
-    "[100 - 1000)",
-    "[1,000 - 10,000)",
-    "[10,000 - 100,000)",
-    "[100,000 - 1,000,000)",
-]
-
-## type 1: 0.001 ~ 1
-## type 2: 1 ~ 10
-## type 3: 10 ~ 100
-## type 4: 100 up
-
-for row in data:
-    if len(row) == 0:
-        continue
-    name = row[0]
-    addresses = row[1]
-    percentage = row[2]
-
-def normalize(data):
+def normalize(data, typeNames):
     count = 0
     newData = []
     for row in data:
@@ -102,8 +60,58 @@ def normalize(data):
 
     return newData
 
-# print(normalize(data))
+def main():
+    header = {
+        'User-Agent': user_agent,
+        'cookie': "lc-acbjp=en; i18n-prefs=USD;"
+    }
 
-with open('test.csv', 'w', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerows(normalize(data))
+    r = requests.get(url, headers=header)
+    html = r.text
+
+    soup = BeautifulSoup(html, 'html5lib')
+    tables = soup.find_all('table')
+    table = tables[0]
+    data = []
+    for tr in table.find_all('tr'):
+        td = tr.find_all('td')
+        row = [i.text for i in td]
+        data.append(row)
+
+    # data 2 csv
+    # types mean 10^n
+    types = [-9999, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+    typeNames = [
+        "(0 - 0.00001)",
+        "[0.00001 - 0.0001)",
+        "[0.0001 - 0.001)",
+        "[0.001 - 0.01)",
+        "[0.01 - 0.1)",
+        "[0.1 - 1)",
+        "[1 - 10)",
+        "[10 - 100)",
+        "[100 - 1000)",
+        "[1,000 - 10,000)",
+        "[10,000 - 100,000)",
+        "[100,000 - 1,000,000)",
+    ]
+
+    ## type 1: 0.001 ~ 1
+    ## type 2: 1 ~ 10
+    ## type 3: 10 ~ 100
+    ## type 4: 100 up
+    data = normalize(data, typeNames=typeNames)
+    for row in data:
+        if len(row) == 0:
+            continue
+        
+        name = row[0]
+        addresses = int(row[1])
+        model.create_bitcoin_info(name, addresses)
+
+    with open('test.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerows(normalize(data, typeNames=typeNames))
+
+if __name__ == '__main__':
+    main()

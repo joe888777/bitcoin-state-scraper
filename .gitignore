@@ -1,1 +1,3 @@
 test.csv
+.env
+__pycache__
