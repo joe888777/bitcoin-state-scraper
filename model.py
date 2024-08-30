@@ -28,7 +28,7 @@ class BaseModel(Model):
 class BitcoinInfo(BaseModel):
     type = CharField(null=False)
     holder_count = IntegerField()
-
+    serial = IntegerField()
     class Meta:
         database = db
 
@@ -36,10 +36,11 @@ class BitcoinInfo(BaseModel):
 db.connect()
 db.create_tables([BitcoinInfo])
 
-def create_bitcoin_info(type, holder_count):
+def create_bitcoin_info(type, holder_count, serial):
     bitcoin_info = BitcoinInfo(
         type = type,
         holder_count = holder_count,
+        serial = serial
     )
     bitcoin_info.save()
     return bitcoin_info
@@ -63,3 +64,12 @@ def delete_bitcoin_info(id):
     bitcoin_info = BitcoinInfo.get(BitcoinInfo.id == id)
     bitcoin_info.delete_instance()
     return bitcoin_info
+
+def get_latest_bitcoin_serial():
+    try:
+        bitcoin_info = BitcoinInfo.select().order_by(BitcoinInfo.id.desc()).limit(1)
+        print("ggg")
+    except:
+        return None;
+
+    return bitcoin_info;

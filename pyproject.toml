@@ -13,6 +13,8 @@ requests = "2.32.3"
 peewee = "^3.17.5"
 pydantic = "^2.7.4"
 pydantic-settings = "^2.3.4"
+psycopg2-binary = "^2.9.9"
+html5lib = "^1.1"
 
 
 [build-system]

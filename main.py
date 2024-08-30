@@ -100,6 +100,12 @@ def main():
     ## type 2: 1 ~ 10
     ## type 3: 10 ~ 100
     ## type 4: 100 up
+    latestSerailArray = model.get_latest_bitcoin_serial();
+    latestSerail = 0;
+    if (latestSerailArray != None):
+        for btc_info in latestSerailArray:
+            latestSerail = btc_info.serial;
+    print(latestSerail)
     data = normalize(data, typeNames=typeNames)
     for row in data:
         if len(row) == 0:
@@ -107,8 +113,7 @@ def main():
         
         name = row[0]
         addresses = int(row[1])
-        model.create_bitcoin_info(name, addresses)
-
+        model.create_bitcoin_info(name, addresses, serial=latestSerail+1)
     with open('test.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(normalize(data, typeNames=typeNames))
