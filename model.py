@@ -68,7 +68,6 @@ def delete_bitcoin_info(id):
 def get_latest_bitcoin_serial():
     try:
         bitcoin_info = BitcoinInfo.select().order_by(BitcoinInfo.id.desc()).limit(1)
-        print("ggg")
     except:
         return None;
 
