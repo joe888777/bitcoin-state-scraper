@@ -34,6 +34,12 @@ def normalize(data, typeNames):
     for row in data:
         if len(row) == 0:
             continue
+        if row[0] == typeNames[0]:
+            count += int(row[1])
+        if row[0] == typeNames[1]:
+            count += int(row[1])
+        if row[0] == typeNames[2]:
+            count += int(row[1])
         if row[0] == typeNames[3] or row[0] == typeNames[4]:
             count += int(row[1])
         if row[0] == typeNames[5]:
@@ -66,7 +72,7 @@ def main():
         'cookie': "lc-acbjp=en; i18n-prefs=USD;"
     }
 
-    r = requests.get(url, headers=header)
+    r = requests.session().get(url, headers=header)
     html = r.text
 
     soup = BeautifulSoup(html, 'html5lib')
@@ -88,12 +94,15 @@ def main():
         "[0.001 - 0.01)",
         "[0.01 - 0.1)",
         "[0.1 - 1)",
+        # type 1
         "[1 - 10)",
         "[10 - 100)",
+        # type 2
         "[100 - 1000)",
         "[1,000 - 10,000)",
         "[10,000 - 100,000)",
         "[100,000 - 1,000,000)",
+        #type 3
     ]
 
     ## type 1: 0.001 ~ 1
