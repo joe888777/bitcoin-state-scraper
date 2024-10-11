@@ -28,6 +28,8 @@ class BaseModel(Model):
 class BitcoinInfo(BaseModel):
     type = CharField(null=False)
     holder_count = IntegerField()
+    btc_count = FloatField()
+    usd_count = FloatField()
     serial = IntegerField()
     class Meta:
         database = db
@@ -36,11 +38,13 @@ class BitcoinInfo(BaseModel):
 db.connect()
 db.create_tables([BitcoinInfo])
 
-def create_bitcoin_info(type, holder_count, serial):
+def create_bitcoin_info(objin):
     bitcoin_info = BitcoinInfo(
-        type = type,
-        holder_count = holder_count,
-        serial = serial
+        type = objin["type"],
+        holder_count = objin["holder_count"],
+        serial = objin["serial"],
+        btc_count = objin["btc_count"],
+        usd_count = objin["usd_count"]
     )
     bitcoin_info.save()
     return bitcoin_info

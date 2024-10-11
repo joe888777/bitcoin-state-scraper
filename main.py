@@ -29,40 +29,66 @@ user_agent = 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Geck
 
 
 def normalize(data, typeNames):
-    count = 0
+    holderCount = 0
+    btcCount = 0
+    usdCount = 0
     newData = []
+
     for row in data:
         if len(row) == 0:
             continue
-        if row[0] == typeNames[0]:
-            count += int(row[1])
-        if row[0] == typeNames[1]:
-            count += int(row[1])
-        if row[0] == typeNames[2]:
-            count += int(row[1])
-        if row[0] == typeNames[3] or row[0] == typeNames[4]:
-            count += int(row[1])
-        if row[0] == typeNames[5]:
-            count += int(row[1])
-            newData.append(["0.001 ~ 1", count, new_timezone_timestamp])
-            count = 0
-        if row[0] == typeNames[6]:
-            count += int(row[1])
-            newData.append(["1 ~ 10", count, new_timezone_timestamp])
-            count = 0
-        if row[0] == typeNames[7]:
-            count += int(row[1])
-            newData.append(["10 ~ 100", count, new_timezone_timestamp])
-            count = 0
-        if row[0] == typeNames[8]:
-            count += int(row[1])
-        if row[0] == typeNames[9]:
-            count += int(row[1])
-        if row[0] == typeNames[10]:
-            count += int(row[1])
-        if row[0] == typeNames[11]:
-            count += int(row[1])
-            newData.append(["100 up", count, new_timezone_timestamp])
+
+        holders = int(row[1])
+        print(row[3])
+        btcs = row[3].split()[0].replace(',', '')
+        btcs = float(btcs)
+
+        usds = row[4].replace('$', '').replace(',', '')
+        usds = float(usds)
+
+        if (row[0] == typeNames[0] or
+                row[0] == typeNames[1] or
+                row[0] == typeNames[2] or
+                row[0] == typeNames[3] or
+                row[0] == typeNames[4]):
+            holderCount += holders
+            btcCount += btcs
+            usdCount += usds
+        elif row[0] == typeNames[5]:
+            holderCount += holders
+            btcCount += btcs
+            usdCount += usds
+            newData.append(["0.001 ~ 1", holderCount, btcCount, usdCount, new_timezone_timestamp])
+            holderCount = 0
+            btcCount = 0
+            usdCount = 0
+        elif row[0] == typeNames[6]:
+            holderCount += holders
+            btcCount += btcs
+            usdCount += usds
+            newData.append(["1 ~ 10", holderCount,  btcCount, usdCount, new_timezone_timestamp])
+            holderCount = 0
+            btcCount = 0
+            usdCount = 0
+        elif row[0] == typeNames[7]:
+            holderCount += holders
+            btcCount += btcs
+            usdCount += usds
+            newData.append(["10 ~ 100", holderCount,  btcCount, usdCount, new_timezone_timestamp])
+            holderCount = 0
+            btcCount = 0
+            usdCount = 0
+        elif (row[0] == typeNames[8] or
+            row[0] == typeNames[9] or
+            row[0] == typeNames[10]):
+            holderCount += holders
+            btcCount += btcs
+            usdCount += usds
+        elif row[0] == typeNames[11]:
+            holderCount += holders
+            btcCount += btcs
+            usdCount += usds
+            newData.append(["100 up", holderCount,  btcCount, usdCount, new_timezone_timestamp])
 
     return newData
 
@@ -120,12 +146,20 @@ def main():
         if len(row) == 0:
             continue
         
-        name = row[0]
-        addresses = int(row[1])
-        model.create_bitcoin_info(name, addresses, serial=latestSerail+1)
-    with open('test.csv', 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerows(normalize(data, typeNames=typeNames))
+        type = row[0] #[0~0.0001]
+        addresses = row[1] #holders
+        btc_count = row[2] #btcs
+        usd_count = row[3] #usds
+
+        # print(f"{type}| {addresses} | {btc_count} | {usd_count}")
+
+        model.create_bitcoin_info({
+            "type": type,
+            "holder_count": addresses,
+            "serial": latestSerail+1,
+            "btc_count": btc_count,
+            "usd_count": usd_count
+        })
 
 if __name__ == '__main__':
     main()
