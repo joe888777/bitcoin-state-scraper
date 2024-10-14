@@ -123,7 +123,13 @@ def getTagretReport(dateData, date):
     return string
 
 def report(allData):
+    if len(allData) == 0:
+        print("illegal data length")
+        return
+
     dates = list(allData.keys())
+    dates = dates[::-1]
+
     for date in dates:
         dateData = allData[date]
         # print(dateData)

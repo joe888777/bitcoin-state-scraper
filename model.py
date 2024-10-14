@@ -72,7 +72,6 @@ def delete_bitcoin_info(id):
 def get_latest_bitcoin_serial():
     try:
         bitcoin_info = BitcoinInfo.select().order_by(BitcoinInfo.id.desc()).limit(1)
-        print("ggg")
     except:
         return None;
 
@@ -125,13 +124,12 @@ def getDataByDaysDesc(length: int):
             "btc_count": data.btc_count,
             "usd_count": data.usd_count
         }
-    print(dataByDays)
+
     for i in range(0, len(dataByDays)):
         if i > 0:
             dataToday = dataByDays[i-1]
             dataYesterday = dataByDays[i]
-            today = dataByDays[i]['100 up']["date"]
-
+            today = dataToday['100 up']["date"]
             deltas = getHolderCountAndDelta(dataToday, dataYesterday)
             targetData[today] = deltas
     return targetData
