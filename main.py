@@ -6,8 +6,19 @@ import csv
 import json
 import model
 import utils
+from enum import Enum
+from config import settings
 
 # a timestamp I'd like to convert
+
+class DataAttr(Enum):
+    BTC_DELTA = "btc_delta"
+    USD_DELTA = "usd_delta"
+    HOLDER_DELTA = "holder_delta"
+    HOLDER_COUNT = "holder_count"
+    BTC_COUNT = "btc_count"
+    USD_COUNT = "usd_count"
+
 my_timestamp = datetime.datetime.now()
 
 # create both timezone objects
@@ -92,6 +103,38 @@ def normalize(data, typeNames):
 
     return newData
 
+
+def getDeltaStr(delta: int):
+    if delta >= 0:
+        return f"增加 {delta}"
+    return f"減少 {-1*delta}"
+def getTagretReport(dateData, date):
+    # dates = list(data.keys())
+    # for date in dates:
+    type1DeltaStr = getDeltaStr(round(dateData["0.001 ~ 1"][DataAttr.BTC_DELTA.value],2))
+    type2DeltaStr = getDeltaStr(round(dateData["1 ~ 10"][DataAttr.BTC_DELTA.value] + dateData["10 ~ 100"][DataAttr.BTC_DELTA.value], 2))
+    type3DeltaStr = getDeltaStr(round(dateData["100 up"][DataAttr.BTC_DELTA.value], 2))
+    string = f"""
+{date} BTC 持有數量統計
+小散戶（0~1）: *{type1DeltaStr}*
+散戶（1~100）: *{type2DeltaStr}*
+巨鯨 （100+）: *{type3DeltaStr}*
+"""
+    return string
+
+def report(allData):
+    dates = list(allData.keys())
+    for date in dates:
+        dateData = allData[date]
+        # print(dateData)
+        reportString = getTagretReport(dateData, date)
+        print(reportString)
+        utils.sendMessage(
+            settings.CHAT_ID,
+            reportString,
+            settings.BOT_TOKEN,
+        );
+
 def main():
     header = {
         'User-Agent': user_agent,
@@ -160,6 +203,9 @@ def main():
             "btc_count": btc_count,
             "usd_count": usd_count
         })
+    # report btc state
+    data = model.getDataByDaysDesc(1)
+    report(data);
 
 if __name__ == '__main__':
     main()

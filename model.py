@@ -77,3 +77,65 @@ def get_latest_bitcoin_serial():
         return None;
 
     return bitcoin_info;
+
+
+def getLatestNDaysData(day: int):
+    limit = day*4
+    latest_records = (BitcoinInfo
+                        .select()
+                        .order_by(BitcoinInfo.created_at.desc())
+                        .limit(limit))
+    return latest_records
+
+def getHolderCountAndDelta(dict1, dict2):
+    # Initialize a dictionary to store the deltas
+    deltas = {}
+
+    # Iterate over the keys in the first dictionary
+    for key in dict1:
+        if key in dict2:
+            # Calculate the delta of holderCount for each type
+            holderDelta = dict1[key]['holderCount'] - dict2[key]['holderCount']
+            btcDelta = dict1[key]['btc_count'] - dict2[key]['btc_count']
+            usdDelta = dict1[key]['usd_count'] - dict2[key]['usd_count']
+            
+            deltas[key] = {
+                "holder_delta": holderDelta,
+                "holder_count": dict1[key]['holderCount'],
+                "btc_delta": btcDelta,
+                "btc_count": dict1[key]['btc_count'],
+                "usd_delta": usdDelta,
+                "usd_count": dict1[key]['usd_count'],
+            }
+
+    return deltas
+
+def getDataByDaysDesc(length: int):
+    length += 1
+    allData = getLatestNDaysData(length)
+    dataByDays = [{} for i in range(0, length)]
+    deltas = {}
+    targetData = {}
+    for i in range(0, len(allData)):
+        data = allData[i]
+        dataByDays[int(i/4)][data.type] = {
+            "time": data.created_at,
+            "holderCount": data.holder_count,
+            "date": getDate(data.created_at),
+            "btc_count": data.btc_count,
+            "usd_count": data.usd_count
+        }
+    print(dataByDays)
+    for i in range(0, len(dataByDays)):
+        if i > 0:
+            dataToday = dataByDays[i-1]
+            dataYesterday = dataByDays[i]
+            today = dataByDays[i]['100 up']["date"]
+
+            deltas = getHolderCountAndDelta(dataToday, dataYesterday)
+            targetData[today] = deltas
+    return targetData
+
+def getDate(datetime):
+    dateString = datetime.strftime('%Y-%m-%d')
+    return dateString

@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     POSTGRES_DB_NAME: str
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
+    BOT_TOKEN: str = ""
+    CHAT_ID: int = -1
 
     model_config = SettingsConfigDict(
         case_sensitive = True,
